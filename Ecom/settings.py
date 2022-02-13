@@ -47,7 +47,8 @@ THIRD_PARTY_APPS = [
 # application was installed with STARTAPP
 LOCAL_APPS = [
     'home',
-    'category'
+    'store',
+    'category',
 ]
 
 
