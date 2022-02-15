@@ -21,5 +21,6 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('product/<int:pk>/', views.ProductDetailView.as_view(), name='product-detail'),
     path('about/', views.about, name='about'),
 ]
