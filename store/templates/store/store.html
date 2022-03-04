@@ -9,7 +9,7 @@
     <!-- ========================= SECTION PAGETOP ========================= -->
     <section class="section-pagetop bg">
         <div class="container">
-            <h2 class="title-page">Our Store</h2>
+            <h2 class="title-page">Boutique</h2>
             
         </div> <!-- container //  -->
     </section>
@@ -135,7 +135,7 @@
             
                     <header class="border-bottom mb-4 pb-3">
                             <div class="form-inline">
-                                <span class="mr-md-auto">{{ product_count }} Items found </span>
+                                <span class="mr-md-auto">{{ product_count }} Articles trouvés </span>
                             </div>
                     </header><!-- sect-heading -->
                     
@@ -155,7 +155,7 @@
                                                     <span class="price">${{product.price}}</span>
                                                 </div> <!-- price-wrap.// -->
                                             </div>
-                                            <a href="#" class="btn btn-block btn-primary">Add to cart </a>	
+                                            <a href="{% url 'add-cart' product.id %}" class="btn btn-block btn-primary">Add to cart </a>	
                                         </figcaption>
                                     </figure>
                                 </div> <!-- col.// -->

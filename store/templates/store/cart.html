@@ -10,7 +10,13 @@
     <div class="container">
     
     <!-- ============================ COMPONENT 1 ================================= -->
-    
+
+    {% if not cart_items %}
+        <h2 class="text-center">Vous n'avez pas de commende disponible.</h2>
+        <div class='text-center'>
+            <a href="{% url 'store'%}" class="btn btn-primary"> Boutique </a>
+        </div>
+    {% else %}
     <div class="row">
         <aside class="col-lg-9">
             <div class="card">
@@ -39,24 +45,24 @@
                                 <!-- col.// -->
                                 <div class="col"> 
                                     <div class="input-group input-spinner">
-                                        <div class="input-group-prepend">
-                                            <a href="{% url 'add-cart' cart_item.product.id %}" class="btn btn-light" type="button" id="button-plus"> <i class="fa fa-plus"></i> </a>
+                                        <div class="input-group-append">
+                                            <a href="{% url 'remove-cart' cart_item.product.id %}" class="btn btn-light" type="button" id="button-minus"> <i class="fa fa-minus"></i> </a>
                                         </div>
                                         <input type="text" class="form-control"  value="{{cart_item.quantite}}">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-light" type="button" id="button-minus"> <i class="fa fa-minus"></i> </button>
+                                        <div class="input-group-prepend">
+                                            <a href="{% url 'add-cart' cart_item.product.id %}" class="btn btn-light" type="button" id="button-plus"> <i class="fa fa-plus"></i> </a>
                                         </div>
                                     </div> <!-- input-group.// -->
                                 </div> <!-- col.// -->
                             </td>
                             <td> 
                                 <div class="price-wrap"> 
-                                    <var class="price">${{cart_item.sub_total}}</var> 
-                                    <small class="text-muted"> ${{cart_item.product.price}} unité </small> 
+                                    <var class="price">{{cart_item.sub_total}} FCFA</var> 
+                                    <small class="text-muted"> {{cart_item.product.price}} FCFA unité </small> 
                                 </div> <!-- price-wrap .// -->
                             </td>
                             <td class="text-right"> 
-                                <a href="" class="btn btn-danger"> Remove</a>
+                                <a href="{% url 'remove' cart_item.product.id%}" class="btn btn-danger"> Remove</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -70,15 +76,15 @@
                 <div class="card-body">
                     <dl class="dlist-align">
                         <dt>Total price:</dt>
-                        <dd class="text-right">${{total}}</dd>
+                        <dd class="text-right px-2">{{total}} FCFA</dd>
                     </dl>
                     <dl class="dlist-align">
                         <dt>Tax:</dt>
-                        <dd class="text-right"> $10.00</dd>
+                        <dd class="text-right">{{tax}} FCFA</dd>
                     </dl>
                     <dl class="dlist-align">
                         <dt>Total:</dt>
-                        <dd class="text-right text-dark b"><strong>$59.97</strong></dd>
+                        <dd class="text-right text-dark b"><strong>{{ global_total}} FCFA</strong></dd>
                     </dl>
                     <hr>
                     <p class="text-center mb-3">
@@ -93,7 +99,7 @@
     
     
     </div> <!-- row.// -->
-    
+    {% endif %}
     <!-- ============================ COMPONENT 1 END .// ================================= -->
     
     </div> <!-- container .//  -->
