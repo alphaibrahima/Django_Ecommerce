@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from store.models import Product
 from .models import Cart, CartItem
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.decorators import login_required
 
 
 
@@ -17,36 +18,52 @@ def _cart_id(request):
 
 
 def add_cart(request, product_id):
+    current_user = request.user
     product = Product.objects.get(id=product_id)
-
-    try :
-        # try recuperate the card that has id equals to _cart_id
-        cart = Cart.objects.get(cart_id=_cart_id(request))
-    #  if this cart not exist we create one
-    except Cart.DoesNotExist :
-        cart = Cart.objects.create(
-            cart_id = _cart_id(request)
-        )
-    cart.save()
-
-    try :
-        cart_item = CartItem.objects.get(product=product, cart=cart )
-        cart_item.quantite +=1
+    if current_user.is_authenticated:
+        try:
+            cart_item = CartItem.objects.get(user=current_user, product=product)
+            cart_item.quantite += 1
+        except CartItem.DoesNotExist:
+            cart_item = CartItem.objects.create(
+                user = current_user,
+                product = product,
+                quantite = 1
+            )
         cart_item.save()
-    except CartItem.DoesNotExist:
-        cart_item = CartItem.objects.create(
-            product = product,
-            quantite = 1,
-            cart = cart
-        )
-    return redirect('cart')
+        return redirect('cart')
+    else:
+        try:
+            cart = Cart.objects.get(cart_id=_cart_id(request))
+        except Cart.DoesNotExist:
+            cart = Cart.objects.create(
+                cart_id = _cart_id(request)
+            )
+            cart.save()
+        try:
+            cart_item = CartItem.objects.get(cart=cart, product=product)
+            cart_item.quantite += 1
+            cart_item.save()
+        except CartItem.DoesNotExist:
+            cart_item = CartItem.objects.create(
+                cart=cart,
+                product=product,
+                quantite = 1
+            )
+            cart_item.save()
+        return redirect('cart')
+
 
 
 # allow the customer to reduce the quantity of his order
 def remove_cart(request, product_id):
-    cart = Cart.objects.get(cart_id=_cart_id(request))
+    current_user = request.user
     product = get_object_or_404(Product, id=product_id)
-    cart_item = CartItem.objects.get(product=product, cart=cart)
+    if current_user.is_authenticated:
+        cart_item = CartItem.objects.get(product=product, user=current_user)
+    else:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        cart_item = CartItem.objects.get(product=product, cart=cart)
 
     if cart_item.quantite > 1:
         cart_item.quantite -= 1
@@ -56,9 +73,15 @@ def remove_cart(request, product_id):
     return redirect('cart')
 
 def remove_cart_item(request, product_id):
-    cart = Cart.objects.get(cart_id=_cart_id(request))
+    
+    current_user = request.user
     product = get_object_or_404(Product, id=product_id)
-    cart_item = CartItem.objects.get(product=product, cart=cart)
+
+    if current_user.is_authenticated:
+        cart_item = CartItem.objects.get(product=product, user=current_user)  
+    else:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        cart_item = CartItem.objects.get(product=product, cart=cart)
     cart_item.delete()
     return redirect('cart')
 
@@ -67,8 +90,11 @@ def cart(request, total = 0, quantity = 0, cart_items = None):
     try:
         tax = 0
         global_total = 0
-        cart = Cart.objects.get(cart_id=_cart_id(request))
-        cart_items = CartItem.objects.filter(cart=cart, is_active=True)
+        if request.user.is_authenticated:
+            cart_items = CartItem.objects.filter(user=request.user, is_active=True)
+        else:
+            cart = Cart.objects.get(cart_id=_cart_id(request))
+            cart_items = CartItem.objects.filter(cart=cart, is_active=True)
         for cart_item in cart_items:
             total += (cart_item.product.price * cart_item.quantite)
             quantity += cart_item.quantite
@@ -88,6 +114,7 @@ def cart(request, total = 0, quantity = 0, cart_items = None):
     return render(request, 'store/cart.html', context)
 
 
+@login_required(login_url='login')
 def checkout(request, total = 0, quantity = 0, cart_items = None):
     try:
         tax = 0

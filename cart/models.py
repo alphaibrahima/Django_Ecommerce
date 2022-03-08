@@ -1,5 +1,7 @@
+from pyexpat import model
 from django.db import models
 from store.models import Product
+from accounts.models import Account
 
 
 class Cart(models.Model):
@@ -13,8 +15,9 @@ class Cart(models.Model):
 
 
 class CartItem(models.Model):
+    user = models.ForeignKey(Account, on_delete=models.CASCADE, null=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    cart =models.ForeignKey(Cart, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, null=True)
     quantite = models.IntegerField()
     is_active = models.BooleanField(default = True)
 
